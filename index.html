@@ -8,7 +8,15 @@
     <title>Neome Wizard</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Keep #root non-empty: Safari holds first paint while the page has
+         nothing to render, causing a long blank screen on slow connections.
+         React replaces this on mount. Plain text only — an <img> here makes
+         Safari hold first paint until the image arrives. -->
+    <div id="root">
+      <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font-family: -apple-system, system-ui, sans-serif; color: #b0b8c4; font-size: 16px;">
+        Processing&hellip;
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
