@@ -1,0 +1,42 @@
+{
+  "name": "wizardv2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start:development": "vite --mode development --open",
+    "start:staging": "vite --mode staging --open",
+    "start:production": "vite --mode production --open",
+    "typecheck": "tsc -b",
+    "build": "tsc -b && vite build",
+    "build:development": "tsc -b && vite build --mode development",
+    "build:staging": "tsc -b && vite build --mode staging",
+    "build:production": "tsc -b && vite build --mode production",
+    "build:ci:development": "npm run build:development",
+    "build:ci:staging": "npm run build:staging",
+    "build:ci:production": "npm run build:production",
+    "preview": "vite preview",
+    "deployDevelopment": "rm -rf dist && npm run build:development && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh development",
+    "deployStaging": "rm -rf dist && npm run build:staging && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh staging",
+    "deployProduction": "rm -rf dist && npm run build:production && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh production"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "libphonenumber-js": "^1.13.7",
+    "nanoid": "^5.1.16",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "~5.9.3",
+    "vite": "^6.4.3"
+  }
+}
