@@ -151,7 +151,7 @@ export async function runDeploy(
       msgEnt = {...msgEnt, studioEnt: merged.studioEnt};
     }
 
-    input.onStatus?.("Creating workspace…");
+    input.onStatus?.("Creating app…");
     await studioEntCreate(msgEnt);
     progress.entId = msgEnt.studioEnt.entId;
     progress.created = true;
@@ -162,7 +162,7 @@ export async function runDeploy(
   // Kick off deployment once; polling below can safely resume against an
   // already-deploying enterprise.
   if (!progress.deployed) {
-    input.onStatus?.("Deploying workspace…");
+    input.onStatus?.("Deploying app…");
     await studioEntDeploy(finalEntId);
     progress.deployed = true;
   }

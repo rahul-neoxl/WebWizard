@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# WizardV2 deployment — zips the built dist/ and pushes it to the wizard host,
+# WebWizard deployment — zips the built dist/ and pushes it to the wizard host,
 # then runs the environment's remote deploy script.
 #
 # Usage:  sh deploy/deploy.sh <development|staging|production>

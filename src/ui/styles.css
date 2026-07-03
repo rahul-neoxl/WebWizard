@@ -1,14 +1,17 @@
 :root {
+  /* Palette aligned with the neome.ai website (Tailwind stone grays +
+     primary-500 #1976d2) so the app-selection -> wizard redirect feels like
+     staying on the same site. */
   --color-primary: #1976d2;
   --color-primary-dark: #1565c0;
   --color-secondary: #9c27b0;
   --color-success: #2e7d32;
   --color-error: #d32f2f;
-  --color-text: #2d3748;
-  --color-text-muted: #6b7280;
-  --color-border: #e5ebf4;
-  --color-bg-page: #f9f9ff;
-  --color-bg-field: #f4f7fb;
+  --color-text: #292524; /* stone-800 — website .text-title */
+  --color-text-muted: #57534e; /* stone-600 — website body text */
+  --color-border: #d6d3d1; /* stone-300 — website default border */
+  --color-bg-page: #f5f5f4; /* stone-100 — app-selection main bg */
+  --color-bg-field: #fafaf9; /* stone-50 */
   --color-bg-card: #ffffff;
   --radius-sm: 10px;
   --radius-md: 12px;
@@ -48,6 +51,9 @@ body {
 }
 
 .wizard-bg-orbs {
+  /* Disabled for visual continuity with the website (plain stone background,
+     no gradient orbs there). Re-enable by removing display: none. */
+  display: none;
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -90,28 +96,22 @@ body {
   display: flex;
   align-items: center;
   padding: 0 16px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
+  /* Same treatment as the website header: bg-base-50/50 + backdrop-blur-xl,
+     borderless. */
+  background: rgba(250, 250, 249, 0.5);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .wizard-header-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
 .wizard-header-brand img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.wizard-header-brand span {
-  font-size: 1.125rem;
-  font-weight: 800;
-  color: var(--color-primary);
-  letter-spacing: -0.02em;
+  /* Website wordmark sizing (h-10 w-auto). */
+  height: 40px;
+  width: auto;
 }
 
 .wizard-main {
@@ -192,6 +192,13 @@ body {
   font-size: 1rem;
 }
 
+.wizard-auth-header .btn-secondary {
+  /* .btn-secondary has 8px horizontal padding (for tap-target size); cancel
+     it here so the text lines up with the title/subtitle above instead of
+     sitting 8px right of them. */
+  margin-left: -8px;
+}
+
 .field-group {
   margin-bottom: 16px;
 }
@@ -214,7 +221,7 @@ body {
 .field-input {
   width: 100%;
   padding: 13px 14px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--color-text);
   background: var(--color-bg-field);
   border: 1px solid var(--color-border);
@@ -350,6 +357,12 @@ body {
   display: flex;
   gap: 8px;
   width: 100%;
+}
+
+.otp-boxes + .btn-primary {
+  /* Extra breathing room below the OTP cells (the shared .btn-primary
+     margin-top of 8px is too tight here). */
+  margin-top: 20px;
 }
 
 .otp-cell {
