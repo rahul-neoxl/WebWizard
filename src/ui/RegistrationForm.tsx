@@ -9,12 +9,13 @@ export interface RegistrationData {
 
 interface Props {
   onSubmit: (data: RegistrationData) => Promise<void>;
+  initialValues?: RegistrationData;
 }
 
-export function RegistrationForm({onSubmit}: Props) {
-  const [fullName, setFullName] = useState("");
-  const [handle, setHandle] = useState("");
-  const [companyName, setCompanyName] = useState("");
+export function RegistrationForm({onSubmit, initialValues}: Props) {
+  const [fullName, setFullName] = useState(initialValues?.fullName ?? "");
+  const [handle, setHandle] = useState(initialValues?.handle ?? "");
+  const [companyName, setCompanyName] = useState(initialValues?.companyName ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -53,8 +54,8 @@ export function RegistrationForm({onSubmit}: Props) {
         )}
 
         <div className="wizard-auth-header">
-          <h1>Get Started</h1>
-          <p>Start now — it&apos;s free. No credit card required.</p>
+          <h1>Start Your Free Trial</h1>
+          <p>Set up your app in minutes. No credit card required.</p>
         </div>
 
         {error && <div className="error-banner">{error}</div>}
@@ -82,7 +83,7 @@ export function RegistrationForm({onSubmit}: Props) {
             className="field-input"
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
-            placeholder="Phone number or email"
+            placeholder="Mobile number or work email"
             autoComplete="email tel"
             inputMode="email"
           />
@@ -108,11 +109,11 @@ export function RegistrationForm({onSubmit}: Props) {
           disabled={!canSubmit}
           onClick={submit}
         >
-          Start Now
+          Create Free App
         </button>
 
         <p className="terms-footer">
-          By clicking on Start Now, you agree to our
+          By clicking on Create Free App, you agree to our
           <br />
           <a
             href="https://www.neome.ai/about/terms-of-services/"

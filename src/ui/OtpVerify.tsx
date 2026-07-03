@@ -156,7 +156,7 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
             Enter the 6-digit code sent to <strong>{handle}</strong>
           </p>
           <button type="button" className="btn-secondary" onClick={onEdit}>
-            Edit contact
+            Change number/email
           </button>
         </div>
 
@@ -186,7 +186,7 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
         <div className="otp-meta">
           <span>
             {secondsLeft > 0
-              ? `Resend in ${formatTime(secondsLeft)}`
+              ? `Resend code in ${formatTime(secondsLeft)}`
               : resendCount >= MAX_RESEND_LIMIT
                 ? "Resend limit reached"
                 : "Didn't receive a code?"}
