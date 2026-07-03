@@ -60,6 +60,7 @@ export default function App() {
   const onFormSubmit = useCallback(async (data: RegistrationData) => {
     setFullName(data.fullName);
     setCompanyName(data.companyName);
+    setVerifyHandle(data.handle);
     const result = await requestOtp(data.handle);
 
     // Already signed in: OTP not needed — go straight to deployment.
@@ -72,7 +73,6 @@ export default function App() {
     }
 
     setVerifyKey(result.verifyKey);
-    setVerifyHandle(data.handle);
     setStep("otp");
   }, [startDeploy]);
 
@@ -114,7 +114,18 @@ export default function App() {
 
   return (
     <Shell>
-      {step === "form" && <RegistrationForm onSubmit={onFormSubmit} />}
+      {step === "form" && (
+        <RegistrationForm
+          onSubmit={onFormSubmit}
+          initialValues={
+            // Re-populate with what the user already entered when they come
+            // back via "Edit contact" from the OTP screen.
+            fullName || verifyHandle || companyName
+              ? {fullName, handle: verifyHandle, companyName}
+              : undefined
+          }
+        />
+      )}
 
       {step === "otp" && verifyKey && (
         <OtpVerify
