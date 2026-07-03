@@ -34,24 +34,37 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   }, [secondsLeft]);
 
   const chars = Array.from({length: OTP_LENGTH}, (_, i) => otp[i] ?? "");
+  const isComplete = chars.every((c) => c !== "");
+
+  // Shared by auto-submit (as soon as the 6th digit is entered) and the
+  // "Verify & Continue" button, so there is exactly one verify code path.
+  const triggerVerify = useCallback(
+    (value: string) => {
+      if (value.length !== OTP_LENGTH || loading) {
+        return;
+      }
+      setLoading(true);
+      setError(undefined);
+      onVerify(value)
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Invalid code.");
+          setOtp("");
+          refs.current[0]?.focus();
+        })
+        .finally(() => setLoading(false));
+    },
+    [loading, onVerify],
+  );
 
   const emit = useCallback(
     (arr: string[]) => {
       const value = arr.join("");
       setOtp(value);
-      if (arr.every((c) => c !== "") && !loading) {
-        setLoading(true);
-        setError(undefined);
-        onVerify(value)
-          .catch((err) => {
-            setError(err instanceof Error ? err.message : "Invalid code.");
-            setOtp("");
-            refs.current[0]?.focus();
-          })
-          .finally(() => setLoading(false));
+      if (arr.every((c) => c !== "")) {
+        triggerVerify(value);
       }
     },
-    [loading, onVerify],
+    [triggerVerify],
   );
 
   const onCellChange = (index: number, raw: string) => {
@@ -182,6 +195,15 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
             />
           ))}
         </div>
+
+        <button
+          type="button"
+          className="btn-primary"
+          disabled={loading || !isComplete}
+          onClick={() => triggerVerify(otp)}
+        >
+          {loading ? "Verifying…" : "Verify & Continue"}
+        </button>
 
         <div className="otp-meta">
           <span>
