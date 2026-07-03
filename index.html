@@ -6,6 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#1976d2" />
     <title>Neome Wizard</title>
+
+    <!-- Google tag (gtag.js) — same GA4 property as the old wizard
+         (measurement id G-DG89L8TY93); async so it never blocks first paint. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG89L8TY93"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      gtag("js", new Date());
+      gtag("config", "G-DG89L8TY93");
+    </script>
   </head>
   <body>
     <!-- Keep #root non-empty: Safari holds first paint while the page has

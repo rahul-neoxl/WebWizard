@@ -30,4 +30,5 @@ export const config = {
   playStoreUrl: import.meta.env.VITE_PLAYSTORE_URL as string,
   apiBaseUrl: getApiBaseUrl(),
   webBaseUrl: `${ssl ? "https" : "http"}://${import.meta.env.VITE_WEB_HOST}`,
+  environment: (import.meta.env.VITE_ENVIRONMENT as string) ?? "unknown",
 };

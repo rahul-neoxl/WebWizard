@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import {MAX_RESEND_LIMIT, OTP_LENGTH, OTP_TOTAL_SECONDS} from "../config";
+import {trackWizardEvent} from "../utils/analytics";
 
 interface Props {
   handle: string;
@@ -22,6 +23,11 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   const [secondsLeft, setSecondsLeft] = useState(OTP_TOTAL_SECONDS);
   const [resendCount, setResendCount] = useState(0);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
+
+  // Fire once when the OTP entry view appears.
+  useEffect(() => {
+    trackWizardEvent("wizard_otp");
+  }, []);
 
   useEffect(() => {
     if (secondsLeft <= 0) {

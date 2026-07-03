@@ -11,6 +11,7 @@ import {
   studioEntDeployStatusGet,
 } from "../api/studio";
 import {newGuid, nextAdminId, nextEntId} from "../net/ids";
+import {trackWizardEvent} from "../utils/analytics";
 import {isoDateTimeNow, getCurrentTimeZone, getLocalDateFormat} from "../utils/date";
 import {resolveTemplatePreselect} from "./templates";
 
@@ -76,9 +77,11 @@ async function pollDeployStatus(entId: string): Promise<void> {
     const status = await studioEntDeployStatusGet(entId);
 
     if (status.executionState === "completed") {
+      trackWizardEvent("wizard_enterprise_deployed");
       return;
     }
     if (status.executionState === "failed") {
+      trackWizardEvent("wizard_enterprise_deploy_failed");
       throw new Error(status.message || "Enterprise deployment failed.");
     }
 

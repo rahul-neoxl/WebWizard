@@ -1,6 +1,7 @@
 import {otpSignIn, otpVerify} from "../api/otp";
 import {callerProfilePatch, grantBearerToken} from "../api/user";
 import {assertSig} from "../net/rpc";
+import {trackWizardEvent} from "../utils/analytics";
 import {normalizeHandle} from "../utils/phone";
 
 export type RequestOtpResult =
@@ -34,6 +35,7 @@ export async function verifyOtpAndAuth(
   fullName: string,
 ): Promise<void> {
   await otpVerify({verifyKey, otp});
+  trackWizardEvent("wizard_otp_verified");
   await grantBearerToken();
 
   const trimmed = fullName.trim();

@@ -7,6 +7,7 @@ import {OtpVerify} from "./ui/OtpVerify";
 import {RegistrationForm, type RegistrationData} from "./ui/RegistrationForm";
 import {Shell} from "./ui/Shell";
 import {Success} from "./ui/Success";
+import {trackWizardEvent} from "./utils/analytics";
 
 type Step = "form" | "otp" | "deploying" | "success";
 
@@ -28,6 +29,7 @@ export default function App() {
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
     document.title = "Neome Wizard";
+    trackWizardEvent("wizard_open");
     return () => {
       document.body.style.overflow = prevBody;
       document.documentElement.style.overflow = prevHtml;
