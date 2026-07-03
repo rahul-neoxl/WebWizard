@@ -6,8 +6,9 @@ export function Shell(props: {children: ReactNode}) {
       <div className="wizard-bg-orbs" aria-hidden="true" />
       <header className="wizard-header">
         <div className="wizard-header-brand">
-          <img src="/logo.png" alt="Neome" />
-          <span>Neome</span>
+          {/* Same wordmark as the neome.ai website header (logo.webp, h-40px)
+              so the redirect from app-selection feels like the same site. */}
+          <img src="/logo.webp" alt="Neome" />
         </div>
       </header>
       <main className="wizard-main">
