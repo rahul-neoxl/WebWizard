@@ -192,6 +192,13 @@ body {
   font-size: 1rem;
 }
 
+.wizard-auth-header .btn-secondary {
+  /* .btn-secondary has 8px horizontal padding (for tap-target size); cancel
+     it here so the text lines up with the title/subtitle above instead of
+     sitting 8px right of them. */
+  margin-left: -8px;
+}
+
 .field-group {
   margin-bottom: 16px;
 }
@@ -350,6 +357,12 @@ body {
   display: flex;
   gap: 8px;
   width: 100%;
+}
+
+.otp-boxes + .btn-primary {
+  /* Extra breathing room below the OTP cells (the shared .btn-primary
+     margin-top of 8px is too tight here). */
+  margin-top: 20px;
 }
 
 .otp-cell {
