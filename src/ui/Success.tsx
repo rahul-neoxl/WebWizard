@@ -17,8 +17,8 @@ export function Success() {
           </div>
         </div>
 
-        <h1>Welcome aboard!</h1>
-        <p className="subtitle">Your workspace is ready.</p>
+        <h1>Your App Is Ready</h1>
+        <p className="subtitle">Start exploring your free app.</p>
 
         <div className="plan-card">
           <div className="plan-card-title">Plan Details</div>
@@ -41,11 +41,11 @@ export function Success() {
         </div>
 
         <button type="button" className="btn-primary btn-start-app" onClick={startApp}>
-          Start Your App →
+          Open Your App →
         </button>
 
         <div className="mobile-download">
-          <div className="mobile-download-label">Get the Mobile App</div>
+          <div className="mobile-download-label">Continue on mobile</div>
           <div className="store-buttons">
             <div className="store-item">
               <a

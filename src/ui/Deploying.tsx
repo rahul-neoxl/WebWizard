@@ -27,7 +27,7 @@ export function Deploying({statusText, showDialog, error, onRetry}: Props) {
         <div className="deploy-center">
           <div className="spinner" />
           <p style={{fontWeight: 500, color: "var(--color-text-muted)"}}>
-            {statusText || "Preparing your workspace…"}
+            {statusText || "Preparing your app…"}
           </p>
         </div>
       </div>
@@ -56,10 +56,10 @@ export function Deploying({statusText, showDialog, error, onRetry}: Props) {
                 </svg>
               </div>
             </div>
-            <h2>Deploying Enterprise</h2>
+            <h2>Deploying App</h2>
             <p>
               Please wait a few moments while we prepare and deploy your
-              organization&apos;s workspace. This may take some time.
+              organization&apos;s app. This may take some time.
             </p>
           </div>
         </div>

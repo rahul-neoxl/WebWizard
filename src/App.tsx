@@ -17,7 +17,7 @@ export default function App() {
   const [verifyHandle, setVerifyHandle] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [deployStatus, setDeployStatus] = useState("Preparing your workspace…");
+  const [deployStatus, setDeployStatus] = useState("Preparing your app…");
   const [deployError, setDeployError] = useState<string>();
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const deployProgress = useRef<DeployProgress>({});
@@ -37,7 +37,7 @@ export default function App() {
   const startDeploy = useCallback(async (name: string) => {
     setDeployError(undefined);
     setShowDeployDialog(true);
-    setDeployStatus("Preparing your workspace…");
+    setDeployStatus("Preparing your app…");
     try {
       await runDeploy(
         {
