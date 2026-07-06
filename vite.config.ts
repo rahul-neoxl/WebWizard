@@ -17,7 +17,7 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react()],
     build: {
-      outDir: "dist",
+      outDir: "build",
       // Never ship source maps (deploy gate: scripts/assert-no-sourcemaps.sh).
       sourcemap: false,
       emptyOutDir: true,
