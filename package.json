@@ -20,9 +20,9 @@
     "build:ci:staging": "npm run build:staging",
     "build:ci:production": "npm run build:production",
     "preview": "vite preview",
-    "deployDevelopment": "rm -rf dist && npm run build:development && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh development",
-    "deployStaging": "rm -rf dist && npm run build:staging && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh staging",
-    "deployProduction": "rm -rf dist && npm run build:production && sh ../scripts/assert-no-sourcemaps.sh dist && sh deploy/deploy.sh production"
+    "deployDevelopment": "rm -rf build && npm run build:development && sh ../scripts/assert-no-sourcemaps.sh build && sh deploy/deploy.sh development",
+    "deployStaging": "rm -rf build && npm run build:staging && sh ../scripts/assert-no-sourcemaps.sh build && sh deploy/deploy.sh staging",
+    "deployProduction": "rm -rf build && npm run build:production && sh ../scripts/assert-no-sourcemaps.sh build && sh deploy/deploy.sh production"
   },
   "dependencies": {
     "axios": "^1.18.1",

@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# WebWizard deployment — zips the built dist/ and pushes it to the wizard host,
+# WebWizard deployment — zips the built build/ and pushes it to the wizard host,
 # then runs the environment's remote deploy script.
 #
 # Usage:  sh deploy/deploy.sh <development|staging|production>
 # Normally invoked via the package.json deploy scripts (deployStaging, etc.),
-# which build dist/ and verify no source maps before calling this.
+# which build build/ and verify no source maps before calling this.
 #
 # NOTE: all three environments push to the SAME remote host ("develop"); the
 # environment only selects the remote source subdir + remote deploy script.
@@ -30,9 +30,9 @@ SSH_PORT=48151
 REMOTE_SOURCE_DEPLOY_DIR="/root/build-process/wizard"
 REMOTE_SOURCE_DIR="$REMOTE_SOURCE_DEPLOY_DIR/$REMOTE_SUBDIR"
 
-# --- Local build output (dist/, resolved relative to this script) ------------
+# --- Local build output (build/, resolved relative to this script) ------------
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-LOCAL_SOURCE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/dist"
+LOCAL_SOURCE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/build"
 BUILD_ZIP_PATH="$LOCAL_SOURCE_DIR/build.zip"
 
 if [ ! -d "$LOCAL_SOURCE_DIR" ]; then
@@ -89,7 +89,7 @@ function deploy() {
       rm "$BUILD_ZIP_PATH"
     fi
 
-    # Zip the contents of dist/ into build.zip (name kept for remote parity).
+    # Zip the contents of build/ into build.zip.
     cd "$LOCAL_SOURCE_DIR"
     zip -r build.zip "./"
     echo "Transfer zip to $SERVER"
