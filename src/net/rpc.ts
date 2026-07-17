@@ -14,14 +14,6 @@ const RPC = axios.create({
 
 let refreshTokenValue: string | undefined;
 
-export function setRefreshToken(token: string | undefined): void {
-  refreshTokenValue = token;
-}
-
-export function getRefreshToken(): string | undefined {
-  return refreshTokenValue;
-}
-
 export function getErrorMessage(envError?: EnvError): string {
   if (!envError) {
     return "Something went wrong. Please try again.";
@@ -181,7 +173,7 @@ export function assertSig<S>(
 
 /**
  * For void-style calls (SigDone etc.): a success envelope carries NO sig field
- * at all — success is simply the absence of error. E.g. studioEntCreate returns
+ * at all — success is simply the absence of error. E.g. callerProfilePatch returns
  * {requestId, serverTime, serviceName, sigName: "SigDone", serverName}.
  */
 export function assertOk<S>(envSig: EnvSignal<S>): S | undefined {

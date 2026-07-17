@@ -16,10 +16,6 @@ export function getBearerToken(): string | undefined {
   return bearerToken;
 }
 
-export function clearBearerToken(): void {
-  bearerToken = undefined;
-}
-
 /**
  * Rotates the refresh token. The old app (SrvcAuth) calls this whenever
  * grantBearerToken responds with updateRefreshToken=true; the rotated token

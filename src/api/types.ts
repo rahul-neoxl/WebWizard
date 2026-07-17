@@ -101,22 +101,18 @@ export interface StudioEnt {
   deployVarMap: StudioEntMap;
 }
 
-export interface MsgStudioEntCreate {
-  adminId: string;
+/**
+ * Single-call enterprise pipeline. The server merges the given template codes into the
+ * supplied StudioEnt, creates the enterprise, and starts deployment — replacing the
+ * separate merge + create + deploy calls.
+ */
+export interface MsgStoreItemEntMergeDeploy {
   studioEnt: StudioEnt;
+  templateCodes: string[];
 }
 
-export interface MsgStudioEntMerge {
-  studioEnt: StudioEnt;
-  storeItemIdSet: string[];
-}
-
-export interface SigStudioEntMerge {
-  studioEnt: StudioEnt;
-}
-
-export interface MsgStudioEntDeploy {
-  sendInvites: boolean;
+export interface SigStoreItemEntMerge {
+  jobKey: string;
 }
 
 export interface MsgVersion {
@@ -136,20 +132,4 @@ export interface SigEntDeployStatus {
   jobKey: string;
   lastUpdate: string;
   message: string;
-}
-
-export interface DtoStoreItemAvatar {
-  name: string;
-  storeItemId: string;
-  templateCode?: string;
-  artifactKind: string;
-}
-
-export interface SigStoreItemListGet {
-  storeItemList: DtoStoreItemAvatar[];
-}
-
-export interface MsgStoreFilters {
-  artifactKindSet: string[];
-  pageSize: number;
 }
