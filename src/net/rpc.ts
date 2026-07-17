@@ -14,14 +14,6 @@ const RPC = axios.create({
 
 let refreshTokenValue: string | undefined;
 
-export function setRefreshToken(token: string | undefined): void {
-  refreshTokenValue = token;
-}
-
-export function getRefreshToken(): string | undefined {
-  return refreshTokenValue;
-}
-
 export function getErrorMessage(envError?: EnvError): string {
   if (!envError) {
     return "Something went wrong. Please try again.";

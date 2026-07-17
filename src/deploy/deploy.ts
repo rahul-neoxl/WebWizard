@@ -34,7 +34,7 @@ function buildStudioVersion(adminId: string) {
  * enterprise details. Every content map is left empty — the server populates them by
  * merging the requested templates.
  */
-export function buildStudioEnt(
+function buildStudioEnt(
   adminId: string,
   entId: string,
   details: StudioEntDetails,
@@ -60,7 +60,7 @@ export function buildStudioEnt(
   };
 }
 
-export function generateIds() {
+function generateIds() {
   return {
     adminId: nextAdminId(),
     entId: nextEntId(),

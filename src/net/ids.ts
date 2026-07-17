@@ -42,7 +42,7 @@ export function nextRequestId(): RequestId {
   return nextIdBig<RequestId>(PREFIX_REQUEST_ID);
 }
 
-export function nextTabId(): TabId {
+function nextTabId(): TabId {
   return nextId<TabId>(PREFIX_TAB_ID);
 }
 
