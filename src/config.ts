@@ -2,7 +2,6 @@ export const APP_SELECTION_URL = "https://neome.ai/app-selection/";
 
 export const WIZARD_FREE_TRIAL_DAYS = 15;
 export const WIZARD_MAX_USERS = 5;
-export const WIZARD_MAX_TEMPLATE_SELECTIONS = 3;
 
 export const OTP_TOTAL_SECONDS = 120;
 export const MAX_RESEND_LIMIT = 3;

@@ -1,19 +1,15 @@
 import {STUDIO_ENT_VERSION} from "../config";
 import type {
-  MsgStudioEntCreate,
+  SigEntDeployStatus,
+  StudioEnt,
   StudioEntDetails,
   StudioEntMap,
 } from "../api/types";
-import {storeItemEntMerge, storeItemListGet} from "../api/store";
-import {
-  studioEntCreate,
-  studioEntDeploy,
-  studioEntDeployStatusGet,
-} from "../api/studio";
+import {storeItemEntMergeDeploy} from "../api/store";
+import {studioEntDeployStatusGet} from "../api/studio";
 import {newGuid, nextAdminId, nextEntId} from "../net/ids";
 import {trackWizardEvent} from "../utils/analytics";
 import {isoDateTimeNow, getCurrentTimeZone, getLocalDateFormat} from "../utils/date";
-import {resolveTemplatePreselect} from "./templates";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 180000;
@@ -34,36 +30,38 @@ function buildStudioVersion(adminId: string) {
   };
 }
 
-export function buildCreateMsg(
+/**
+ * Builds the StudioEnt for storeItemEntMergeDeploy: version metadata + entId + the
+ * enterprise details. Every content map is left empty — the server populates them by
+ * merging the requested templates.
+ */
+function buildStudioEnt(
   adminId: string,
   entId: string,
   details: StudioEntDetails,
-): MsgStudioEntCreate {
+): StudioEnt {
   return {
-    adminId,
-    studioEnt: {
-      ...buildStudioVersion(adminId),
-      entId,
-      details,
-      varMap: emptyMap(),
-      translationMap: emptyMap(),
-      actionMap: emptyMap(),
-      automationMap: emptyMap(),
-      driveSheetMap: emptyMap(),
-      formMap: emptyMap(),
-      moduleMap: emptyMap(),
-      groupMap: emptyMap(),
-      pluginMap: emptyMap(),
-      roleMap: emptyMap(),
-      reportMap: emptyMap(),
-      deeplinkMap: emptyMap(),
-      spreadsheetMap: emptyMap(),
-      deployVarMap: emptyMap(),
-    },
+    ...buildStudioVersion(adminId),
+    entId,
+    details,
+    varMap: emptyMap(),
+    translationMap: emptyMap(),
+    actionMap: emptyMap(),
+    automationMap: emptyMap(),
+    driveSheetMap: emptyMap(),
+    formMap: emptyMap(),
+    moduleMap: emptyMap(),
+    groupMap: emptyMap(),
+    pluginMap: emptyMap(),
+    roleMap: emptyMap(),
+    reportMap: emptyMap(),
+    deeplinkMap: emptyMap(),
+    spreadsheetMap: emptyMap(),
+    deployVarMap: emptyMap(),
   };
 }
 
-export function generateIds() {
+function generateIds() {
   return {
     adminId: nextAdminId(),
     entId: nextEntId(),
@@ -72,17 +70,29 @@ export function generateIds() {
 
 async function pollDeployStatus(entId: string): Promise<void> {
   const started = Date.now();
+  let sawStatus = false;
 
   while (Date.now() - started < POLL_TIMEOUT_MS) {
-    const status = await studioEntDeployStatusGet(entId);
+    let status: SigEntDeployStatus | undefined;
+    try {
+      status = await studioEntDeployStatusGet(entId);
+      sawStatus = true;
+    } catch (err) {
+      // storeItemEntMergeDeploy queues an async job, so the enterprise's deploy status
+      // may not be queryable on the very first poll(s). Tolerate that until we've read a
+      // status once; after that, surface genuine errors.
+      if (sawStatus) {
+        throw err;
+      }
+    }
 
-    if (status.executionState === "completed") {
+    if (status?.executionState === "completed") {
       trackWizardEvent("wizard_enterprise_deployed");
       return;
     }
-    if (status.executionState === "failed") {
+    if (status?.executionState === "failed") {
       trackWizardEvent("wizard_enterprise_deploy_failed");
-      throw new Error(status.message || "Enterprise deployment failed.");
+      throw new Error(status.message || "App deployment failed.");
     }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
@@ -102,14 +112,13 @@ export interface DeployResult {
 }
 
 /**
- * Tracks how far a deploy attempt progressed so a retry can resume instead of
- * starting over. Pass the same object across retries: once the enterprise is
- * created we skip create+merge (which would otherwise spawn a duplicate
- * enterprise) and only re-run deploy/poll.
+ * Tracks how far a deploy attempt progressed so a retry can resume instead of starting
+ * over. Once the merge-deploy job has been queued we keep the same entId and only
+ * re-poll on retry — we never queue a second job (which would create a duplicate
+ * enterprise).
  */
 export interface DeployProgress {
   entId?: string;
-  created?: boolean;
   deployed?: boolean;
 }
 
@@ -122,56 +131,29 @@ export async function runDeploy(
     throw new Error("Company name is required.");
   }
 
-  // Create the enterprise exactly once across retries.
-  if (!progress.created) {
-    input.onStatus?.("Loading templates…");
-    const storeItems = await storeItemListGet();
-    const {storeItemIds, templateCodes} = resolveTemplatePreselect(
-      storeItems,
-      input.preSelectedApps,
-    );
+  // Merge templates + create + deploy in a single server call, exactly once across
+  // retries. templateCodes come straight from the ?app= query params.
+  if (!progress.deployed) {
+    input.onStatus?.("Setting up your app…");
 
     const {adminId, entId} = generateIds();
-    const entDetails: StudioEntDetails = {
+    const details: StudioEntDetails = {
       name,
       timeZone: getCurrentTimeZone(),
       displayDateFormat: getLocalDateFormat(),
-      ...(templateCodes.length > 0 ? {templateCodes} : {}),
     };
 
-    let msgEnt = buildCreateMsg(adminId, entId, entDetails);
+    await storeItemEntMergeDeploy({
+      studioEnt: buildStudioEnt(adminId, entId, details),
+      templateCodes: input.preSelectedApps,
+    });
 
-    if (storeItemIds.length > 0) {
-      input.onStatus?.(
-        storeItemIds.length > 1
-          ? "Merging templates…"
-          : "Applying template…",
-      );
-      const merged = await storeItemEntMerge({
-        studioEnt: msgEnt.studioEnt,
-        storeItemIdSet: storeItemIds,
-      });
-      msgEnt = {...msgEnt, studioEnt: merged.studioEnt};
-    }
-
-    input.onStatus?.("Creating app…");
-    await studioEntCreate(msgEnt);
-    progress.entId = msgEnt.studioEnt.entId;
-    progress.created = true;
-  }
-
-  const finalEntId = progress.entId as string;
-
-  // Kick off deployment once; polling below can safely resume against an
-  // already-deploying enterprise.
-  if (!progress.deployed) {
-    input.onStatus?.("Deploying app…");
-    await studioEntDeploy(finalEntId);
+    progress.entId = entId;
     progress.deployed = true;
   }
 
   input.onStatus?.("Finishing setup…");
-  await pollDeployStatus(finalEntId);
+  await pollDeployStatus(progress.entId as string);
 
-  return {entId: finalEntId};
+  return {entId: progress.entId as string};
 }
