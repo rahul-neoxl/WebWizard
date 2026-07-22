@@ -244,6 +244,129 @@ body {
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
 }
 
+.field-select {
+  position: relative;
+}
+
+.field-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.field-select-trigger.is-placeholder {
+  color: rgba(107, 114, 128, 0.7);
+}
+
+.field-select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-select-chevron {
+  flex-shrink: 0;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.field-select.is-open .field-select-chevron {
+  transform: rotate(180deg);
+}
+
+.field-select-backdrop {
+  display: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.field-select-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  max-height: min(280px, 50vh);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.field-select-option {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  /* Comfortable touch target on phones */
+  min-height: 44px;
+}
+
+.field-select-option:hover,
+.field-select-option:focus-visible {
+  background: #f1f5f9;
+  outline: none;
+}
+
+.field-select-option.is-selected {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+/* Phone / narrow viewports: bottom sheet so the menu stays on-screen
+   and is easy to tap with a thumb. */
+@media (max-width: 640px) {
+  .field-select-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  .field-select-menu {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 50;
+    max-height: min(52vh, 360px);
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.28);
+  }
+
+  .field-select-option {
+    padding: 14px 16px;
+    font-size: 17px;
+    border-radius: 10px;
+  }
+}
+
 .btn-primary {
   width: 100%;
   margin-top: 8px;

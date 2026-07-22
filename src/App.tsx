@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
+import {submitContactUsBestEffort} from "./api/contact";
 import {requestOtp, verifyOtpAndAuth} from "./auth/auth";
 import {runDeploy, type DeployProgress} from "./deploy/deploy";
 import {useAppParams} from "./hooks/useAppParams";
@@ -18,6 +19,7 @@ export default function App() {
   const [verifyHandle, setVerifyHandle] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [companySize, setCompanySize] = useState("");
   const [deployStatus, setDeployStatus] = useState("Preparing your app…");
   const [deployError, setDeployError] = useState<string>();
   const [showDeployDialog, setShowDeployDialog] = useState(false);
@@ -62,7 +64,18 @@ export default function App() {
   const onFormSubmit = useCallback(async (data: RegistrationData) => {
     setFullName(data.fullName);
     setCompanyName(data.companyName);
+    setCompanySize(data.companySize ?? "");
     setVerifyHandle(data.handle);
+
+    // Lead capture (same contactUs API as website Book-a-Demo). Best-effort
+    // only — must not delay or fail OTP / deploy.
+    submitContactUsBestEffort({
+      fullName: data.fullName,
+      handle: data.handle,
+      companyName: data.companyName,
+      companySize: data.companySize,
+    });
+
     const result = await requestOtp(data.handle);
 
     // Already signed in: OTP not needed — go straight to deployment.
@@ -123,7 +136,12 @@ export default function App() {
             // Re-populate with what the user already entered when they come
             // back via "Edit contact" from the OTP screen.
             fullName || verifyHandle || companyName
-              ? {fullName, handle: verifyHandle, companyName}
+              ? {
+                  fullName,
+                  handle: verifyHandle,
+                  companyName,
+                  ...(companySize ? {companySize} : {}),
+                }
               : undefined
           }
         />
