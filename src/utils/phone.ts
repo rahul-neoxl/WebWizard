@@ -16,13 +16,17 @@ const timezoneDialCodes: Record<string, string> = {
   "Australia/Sydney": "+61",
 };
 
+export function isEmailHandle(handle: string): boolean {
+  return EMAIL_REGEX.test(handle.trim());
+}
+
 export function isValidHandle(handle: string): boolean {
   const value = handle.trim();
   if (!value) {
     return false;
   }
   return (
-    EMAIL_REGEX.test(value) ||
+    isEmailHandle(value) ||
     PHONE_REGEX.test(value.replace(/[\s-]/g, ""))
   );
 }
