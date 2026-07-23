@@ -20,6 +20,22 @@ export interface ContactUsInput {
   companySize?: string;
 }
 
+/** Keys already sent or in-flight this page load — blocks double-submit / retries. */
+const contactUsKeys = new Set<string>();
+
+function contactUsKey(input: ContactUsInput): string {
+  const handle = input.handle.trim();
+  const normalized = isEmailHandle(handle)
+    ? handle.toLowerCase()
+    : normalizeHandle(handle);
+  return [
+    input.fullName.trim().toLowerCase(),
+    normalized,
+    input.companyName.trim().toLowerCase(),
+    input.companySize ?? "",
+  ].join("|");
+}
+
 /**
  * Same endpoint + payload shape as the website Book-a-Demo / Contact form
  * (`user/contactUs`). Maps the wizard's single handle into email or phone.
@@ -53,10 +69,21 @@ export async function submitContactUs(input: ContactUsInput): Promise<void> {
 }
 
 /**
- * Fire-and-forget: lead capture must never block or fail the wizard flow.
+ * Fire-and-forget lead capture. Dedupes identical payloads for this page load
+ * so double-clicks, OTP retries, and "edit contact" resubmits with the same
+ * data do not spam the server. Must never block or fail the wizard flow.
  */
 export function submitContactUsBestEffort(input: ContactUsInput): void {
+  const key = contactUsKey(input);
+  if (contactUsKeys.has(key)) {
+    return;
+  }
+  // Reserve immediately so a second concurrent call cannot race past the check.
+  contactUsKeys.add(key);
+
   void submitContactUs(input).catch((err) => {
+    // Allow a later retry if the network/API call itself failed.
+    contactUsKeys.delete(key);
     console.warn("contactUs failed:", err);
   });
 }

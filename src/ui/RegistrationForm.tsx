@@ -28,6 +28,17 @@ function CompanySizeSelect({
   const listId = useId();
   const selected = COMPANY_SIZE_OPTIONS.find((option) => option.value === value);
 
+  // iOS Safari fires a synthetic "ghost" click ~300ms after a tap. When a tap
+  // closes this bottom-sheet, that ghost click hit-tests against whatever now
+  // sits under the finger — which is the "Create Free App" button directly
+  // beneath the first option — and submits the form. Handling the tap on
+  // touchend + preventDefault() cancels the emulated click entirely, so it can
+  // never fall through. onClick stays for mouse / keyboard / assistive tech.
+  const select = (next: string) => {
+    onChange(next);
+    setOpen(false);
+  };
+
   useEffect(() => {
     if (!open) {
       return;
@@ -92,6 +103,10 @@ function CompanySizeSelect({
             className="field-select-backdrop"
             aria-label="Close company size options"
             onClick={() => setOpen(false)}
+            onTouchEnd={(event) => {
+              event.preventDefault();
+              setOpen(false);
+            }}
           />
           <ul
             id={listId}
@@ -108,9 +123,10 @@ function CompanySizeSelect({
                     role="option"
                     aria-selected={isSelected}
                     className={`field-select-option${isSelected ? " is-selected" : ""}`}
-                    onClick={() => {
-                      onChange(option.value);
-                      setOpen(false);
+                    onClick={() => select(option.value)}
+                    onTouchEnd={(event) => {
+                      event.preventDefault();
+                      select(option.value);
                     }}
                   >
                     {option.label}
@@ -132,6 +148,8 @@ export function RegistrationForm({onSubmit, initialValues}: Props) {
   const [companySize, setCompanySize] = useState(initialValues?.companySize ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  // Synchronous guard — React state alone cannot block a double-click before re-render.
+  const submittingRef = useRef(false);
 
   const canSubmit =
     fullName.trim() &&
@@ -140,9 +158,10 @@ export function RegistrationForm({onSubmit, initialValues}: Props) {
     !loading;
 
   const submit = useCallback(async () => {
-    if (!canSubmit) {
+    if (!canSubmit || submittingRef.current) {
       return;
     }
+    submittingRef.current = true;
     setLoading(true);
     setError(undefined);
     try {
@@ -155,6 +174,7 @@ export function RegistrationForm({onSubmit, initialValues}: Props) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send verification code.");
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }, [canSubmit, companyName, companySize, fullName, handle, onSubmit]);
@@ -163,8 +183,11 @@ export function RegistrationForm({onSubmit, initialValues}: Props) {
     <div className="wizard-step fade-in">
       <div className="wizard-step-inner">
         {loading && (
-          <div className="loading-overlay">
-            <div className="spinner" />
+          <div className="loading-overlay" aria-live="polite">
+            <div className="loading-overlay-inner">
+              <div className="spinner" />
+              <p className="loading-overlay-text">Setting up your app…</p>
+            </div>
           </div>
         )}
 
@@ -233,9 +256,10 @@ export function RegistrationForm({onSubmit, initialValues}: Props) {
           type="button"
           className="btn-primary"
           disabled={!canSubmit}
+          aria-busy={loading}
           onClick={submit}
         >
-          Create Free App
+          {loading ? "Creating your app…" : "Create Free App"}
         </button>
 
         <p className="terms-footer">
