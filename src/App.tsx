@@ -24,6 +24,13 @@ export default function App() {
   const [deployError, setDeployError] = useState<string>();
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const deployProgress = useRef<DeployProgress>({});
+  /**
+   * Off-screen input focused during the "Create Free App" tap to hold the mobile
+   * soft-keyboard open across the async OTP request. iOS only opens the keyboard
+   * for a focus() made inside a user gesture, so we can't wait until the OTP
+   * screen mounts — OtpVerify then hands focus from here to its first box.
+   */
+  const keyboardKeeperRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const prevBody = document.body.style.overflow;
@@ -62,13 +69,21 @@ export default function App() {
   }, [preSelectedApps]);
 
   const onFormSubmit = useCallback(async (data: RegistrationData) => {
+    // Runs synchronously from the button tap up to the `await` below, so this
+    // focus is still inside the gesture — the only point iOS will raise the
+    // keyboard. It stays on the keeper until the OTP screen takes over.
+    keyboardKeeperRef.current?.focus({preventScroll: true});
+
     setFullName(data.fullName);
     setCompanyName(data.companyName);
     setCompanySize(data.companySize ?? "");
     setVerifyHandle(data.handle);
 
-    // Lead capture (same contactUs API as website Book-a-Demo). Best-effort
-    // only — must not delay or fail OTP / deploy.
+    // Lead capture (same contactUs API as website Book-a-Demo). Best-effort —
+    // must not delay or fail OTP / deploy. submitContactUsBestEffort dedupes
+    // identical payloads for this page load, so double-taps and same-data
+    // resubmits don't spam the server, while a corrected contact (via "Change
+    // number/email") is still captured.
     submitContactUsBestEffort({
       fullName: data.fullName,
       handle: data.handle,
@@ -82,6 +97,9 @@ export default function App() {
     // (Profile-name patch is skipped, matching the old app's authenticated
     // flow, so an existing profile name is not overwritten.)
     if (result.kind === "alreadySignedIn") {
+      // No OTP step — release the keeper so the keyboard doesn't hang over the
+      // deploy screen.
+      keyboardKeeperRef.current?.blur();
       setStep("deploying");
       await startDeploy(data.companyName);
       return;
@@ -129,6 +147,18 @@ export default function App() {
 
   return (
     <Shell>
+      {/* Off-screen helper that holds the mobile keyboard open between the form
+          submit and the OTP screen — see keyboardKeeperRef. Programmatic focus
+          only; not part of the tab order or the accessibility tree. */}
+      <input
+        ref={keyboardKeeperRef}
+        className="kb-keeper"
+        inputMode="numeric"
+        tabIndex={-1}
+        aria-hidden="true"
+        autoComplete="off"
+      />
+
       {step === "form" && (
         <RegistrationForm
           onSubmit={onFormSubmit}

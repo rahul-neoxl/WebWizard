@@ -23,6 +23,17 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   const [secondsLeft, setSecondsLeft] = useState(OTP_TOTAL_SECONDS);
   const [resendCount, setResendCount] = useState(0);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
+  // Synchronous guard — `loading` state updates too late to block a rapid
+  // double-tap or an auto-submit racing the button (same fix as the form).
+  const busyRef = useRef(false);
+
+  // Move focus into the first box on mount. On mobile this also keeps the soft
+  // keyboard up: App focuses an off-screen keeper input during the submit tap
+  // (the only moment iOS will open the keyboard), and handing focus over here
+  // keeps it open with the cursor in box 1 instead of dismissing it.
+  useEffect(() => {
+    refs.current[0]?.focus({preventScroll: true});
+  }, []);
 
   // Fire once when the OTP entry view appears.
   useEffect(() => {
@@ -46,9 +57,10 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   // "Verify & Continue" button, so there is exactly one verify code path.
   const triggerVerify = useCallback(
     (value: string) => {
-      if (value.length !== OTP_LENGTH || loading) {
+      if (value.length !== OTP_LENGTH || busyRef.current) {
         return;
       }
+      busyRef.current = true;
       setLoading(true);
       setError(undefined);
       onVerify(value)
@@ -57,9 +69,12 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
           setOtp("");
           refs.current[0]?.focus();
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          busyRef.current = false;
+          setLoading(false);
+        });
     },
-    [loading, onVerify],
+    [onVerify],
   );
 
   const emit = useCallback(
@@ -136,9 +151,10 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   };
 
   const resend = async () => {
-    if (resendCount >= MAX_RESEND_LIMIT || secondsLeft > 0 || loading) {
+    if (resendCount >= MAX_RESEND_LIMIT || secondsLeft > 0 || busyRef.current) {
       return;
     }
+    busyRef.current = true;
     setLoading(true);
     setError(undefined);
     try {
@@ -150,6 +166,7 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to resend code.");
     } finally {
+      busyRef.current = false;
       setLoading(false);
     }
   };
@@ -191,7 +208,6 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
               className="otp-cell"
               value={c}
               disabled={loading}
-              autoFocus={i === 0}
               inputMode="numeric"
               maxLength={1}
               aria-label={`Digit ${i + 1}`}
