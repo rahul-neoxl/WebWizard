@@ -453,6 +453,24 @@ body {
   line-height: 1.5;
 }
 
+/* Off-screen keyboard keeper (see App.tsx keyboardKeeperRef). Must stay
+   rendered and non-zero-size — iOS won't open the keyboard for display:none,
+   visibility:hidden, opacity:0, or 0x0 elements. So it's moved off-screen
+   rather than hidden. 16px font-size avoids the iOS focus-zoom. */
+.kb-keeper {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  font-size: 16px;
+  caret-color: transparent;
+  pointer-events: none;
+}
+
 .loading-overlay {
   position: absolute;
   inset: 0;

@@ -26,6 +26,14 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
   // double-tap or an auto-submit racing the button (same fix as the form).
   const busyRef = useRef(false);
 
+  // Move focus into the first box on mount. On mobile this also keeps the soft
+  // keyboard up: App focuses an off-screen keeper input during the submit tap
+  // (the only moment iOS will open the keyboard), and handing focus over here
+  // keeps it open with the cursor in box 1 instead of dismissing it.
+  useEffect(() => {
+    refs.current[0]?.focus({preventScroll: true});
+  }, []);
+
   useEffect(() => {
     if (secondsLeft <= 0) {
       return;
@@ -194,7 +202,6 @@ export function OtpVerify({handle, onVerify, onResend, onEdit}: Props) {
               className="otp-cell"
               value={c}
               disabled={loading}
-              autoFocus={i === 0}
               inputMode="numeric"
               maxLength={1}
               aria-label={`Digit ${i + 1}`}
