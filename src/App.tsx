@@ -65,8 +65,11 @@ export default function App() {
     setCompanySize(data.companySize ?? "");
     setVerifyHandle(data.handle);
 
-    // Lead capture (same contactUs API as website Book-a-Demo). Best-effort
-    // only — must not delay or fail OTP / deploy.
+    // Lead capture (same contactUs API as website Book-a-Demo). Best-effort —
+    // must not delay or fail OTP / deploy. submitContactUsBestEffort dedupes
+    // identical payloads for this page load, so double-taps and same-data
+    // resubmits don't spam the server, while a corrected contact (via "Change
+    // number/email") is still captured.
     submitContactUsBestEffort({
       fullName: data.fullName,
       handle: data.handle,

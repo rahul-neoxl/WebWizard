@@ -379,7 +379,12 @@ body {
   cursor: pointer;
   background: linear-gradient(145deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   box-shadow: var(--shadow-btn);
-  transition: filter 0.2s, box-shadow 0.2s;
+  transition: filter 0.15s, box-shadow 0.15s, transform 0.05s;
+  /* Skip the double-tap-zoom wait and give an instant tap highlight so a tap is
+     acknowledged immediately on touch devices (iOS/Android). */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -387,10 +392,22 @@ body {
   box-shadow: 0 12px 32px rgba(25, 118, 210, 0.42);
 }
 
+/* Immediate press feedback before React re-renders the loading state. */
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.985);
+  filter: brightness(0.96);
+}
+
 .btn-primary:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.btn-primary[aria-busy="true"] {
+  /* Keep it looking active (not greyed-out) while the request is in flight. */
+  opacity: 1;
+  cursor: progress;
 }
 
 .btn-secondary {
@@ -401,6 +418,8 @@ body {
   cursor: pointer;
   padding: 8px;
   font-size: 14px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-secondary:disabled {
@@ -440,9 +459,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  z-index: 2;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 3;
   border-radius: var(--radius-xl);
+}
+
+.loading-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.loading-overlay-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-muted);
 }
 
 .spinner {

@@ -144,16 +144,27 @@ async function rpcCallOnce<S>(
         return envSig;
       }
     }
-    const detail =
-      axios.isAxiosError(err) && err.message ? err.message : undefined;
+    const code = axios.isAxiosError(err) ? err.code : undefined;
+    const isTimeout = code === "ECONNABORTED";
+    const isNetwork =
+      code === "ERR_NETWORK" ||
+      (axios.isAxiosError(err) && err.message === "Network Error");
+
+    let errorMessage: string;
+    if (isTimeout) {
+      errorMessage = "The request took too long. Please try again.";
+    } else if (isNetwork) {
+      // End users just need to know it's a connectivity problem. The dev-server
+      // hint is only useful (and only shown) during local development.
+      errorMessage = import.meta.env.DEV
+        ? "Unable to reach the server. If you're running locally, restart the dev server so the API proxy is active."
+        : "Unable to connect. Please check your internet connection and try again.";
+    } else {
+      errorMessage = "Unable to connect. Please check your internet connection and try again.";
+    }
+
     return {
-      error: {
-        errorCode: "networkError",
-        errorMessage:
-          detail === "Network Error"
-            ? "Unable to reach the server. If you're running locally, restart the dev server so the API proxy is active."
-            : detail ?? "Network request failed",
-      },
+      error: {errorCode: "networkError", errorMessage},
     };
   }
 }

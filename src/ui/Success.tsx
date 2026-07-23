@@ -1,10 +1,19 @@
+import {useState} from "react";
 import {config, WIZARD_FREE_TRIAL_DAYS, WIZARD_MAX_USERS} from "../config";
 import {formatTrialEndDate} from "../utils/date";
 
 export function Success() {
   const trialEnd = formatTrialEndDate(WIZARD_FREE_TRIAL_DAYS);
+  const [opening, setOpening] = useState(false);
 
   const startApp = () => {
+    // Loading the app can take a moment on mobile; show feedback immediately so
+    // the tap is acknowledged instead of appearing to do nothing. The guard also
+    // prevents a second navigation from a double-tap.
+    if (opening) {
+      return;
+    }
+    setOpening(true);
     window.location.href = config.webBaseUrl;
   };
 
@@ -40,8 +49,14 @@ export function Success() {
           </div>
         </div>
 
-        <button type="button" className="btn-primary btn-start-app" onClick={startApp}>
-          Open Your App →
+        <button
+          type="button"
+          className="btn-primary btn-start-app"
+          onClick={startApp}
+          disabled={opening}
+          aria-busy={opening}
+        >
+          {opening ? "Opening…" : "Open Your App →"}
         </button>
 
         <div className="mobile-download">
