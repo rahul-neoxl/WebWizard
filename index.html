@@ -7,51 +7,61 @@
     <meta name="theme-color" content="#1976d2" />
     <title>Neome Wizard</title>
 
-    <!-- Google tag (gtag.js) — same GA4 property as the old wizard
-         (measurement id G-DG89L8TY93); async so it never blocks first paint. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG89L8TY93"></script>
+    <!-- Analytics: GA4 (G-DG89L8TY93) + Google Tag Manager (GTM-K4S8T42L),
+         loaded on the PRODUCTION HOST ONLY.
+
+         The hostname is the gate because it is ground truth: staging, the
+         orgbeat development environment and localhost never load either tag,
+         no matter which branch or build mode produced the bundle. That is why
+         analytics can now live on every branch — previously it existed only on
+         main, which meant a production deploy from develop silently shipped no
+         analytics, while `deployStaging` from main still sent staging traffic
+         to GA4. Add a host here (or map host -> measurement id) if the wizard
+         ever gains another production domain.
+
+         Nothing downstream needs a matching guard: trackWizardEvent() in
+         src/utils/analytics.ts already no-ops when window.gtag is absent.
+
+         No Consent Mode defaults, deliberately — this app has no cookie
+         banner, so a denied default could never be granted. It would pin GA4
+         to cookieless mode, lose the _ga cookie shared on .neome.ai, and give
+         wizard visitors a different client_id, splitting the onboarding
+         funnel. Fixing that properly means sharing the marketing site's
+         consent choice via a cookie scoped to .neome.ai. -->
     <script>
-      window.dataLayer = window.dataLayer || [];
+      (function () {
+        var PRODUCTION_HOSTS = ["wizard.neome.ai"];
+        if (PRODUCTION_HOSTS.indexOf(window.location.hostname) === -1) {
+          return;
+        }
 
-      function gtag() {
-        dataLayer.push(arguments);
-      }
+        var GA_ID = "G-DG89L8TY93";
+        var GTM_ID = "GTM-K4S8T42L";
 
-      gtag("js", new Date());
-      gtag("config", "G-DG89L8TY93");
-    </script>
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () {
+          window.dataLayer.push(arguments);
+        };
 
-    <!-- Google Tag Manager (container GTM-K4S8T42L) — owned by us; the Google
-         Ads agency manages its Ads tags. Placed AFTER the gtag block above so
-         GA4 initialises first, matching the ordering on the marketing site.
+        // Queue GA4 before GTM so the property is configured first.
+        window.gtag("js", new Date());
+        window.gtag("config", GA_ID);
 
-         Note: unlike the marketing site, this app has no cookie banner, so
-         there are no Consent Mode defaults to set here — adding a denied
-         default with no way to grant it would force GA4 cookieless and break
-         client_id sharing with neome.ai, splitting the onboarding funnel. -->
-    <script>
-      (function (w, d, s, l, i) {
-        w[l] = w[l] || [];
-        w[l].push({"gtm.start": new Date().getTime(), event: "gtm.js"});
-        var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
-        j.async = true;
-        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
-        f.parentNode.insertBefore(j, f);
-      })(window, document, "script", "dataLayer", "GTM-K4S8T42L");
+        var ga = document.createElement("script");
+        ga.async = true;
+        ga.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+        document.head.appendChild(ga);
+
+        window.dataLayer.push({"gtm.start": new Date().getTime(), event: "gtm.js"});
+
+        var gtm = document.createElement("script");
+        gtm.async = true;
+        gtm.src = "https://www.googletagmanager.com/gtm.js?id=" + GTM_ID;
+        document.head.appendChild(gtm);
+      })();
     </script>
   </head>
   <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript
-      ><iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-K4S8T42L"
-        height="0"
-        width="0"
-        style="display: none; visibility: hidden"
-      ></iframe
-    ></noscript>
     <!-- Keep #root non-empty: Safari holds first paint while the page has
          nothing to render, causing a long blank screen on slow connections.
          React replaces this on mount. Plain text only — an <img> here makes
