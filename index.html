@@ -22,12 +22,19 @@
          Nothing downstream needs a matching guard: trackWizardEvent() in
          src/utils/analytics.ts already no-ops when window.gtag is absent.
 
-         No Consent Mode defaults, deliberately — this app has no cookie
-         banner, so a denied default could never be granted. It would pin GA4
-         to cookieless mode, lose the _ga cookie shared on .neome.ai, and give
-         wizard visitors a different client_id, splitting the onboarding
-         funnel. Fixing that properly means sharing the marketing site's
-         consent choice via a cookie scoped to .neome.ai. -->
+         GA4 and GTM carry no Consent Mode defaults here, deliberately. This
+         app shows no banner, so a denied default could never be granted: it
+         would pin GA4 to cookieless mode, lose the _ga cookie shared on
+         .neome.ai, and give wizard visitors a different client_id, splitting
+         the onboarding funnel.
+
+         The Meta Pixel is different and IS consent-gated, because it is
+         advertising and cannot run cookieless at all. It reads the choice the
+         visitor already made on neome.ai, carried in a cookie scoped to
+         .neome.ai (written by CookieConsent there). No banner is shown here by
+         design: every visitor reaches this app from the marketing site, so the
+         answer always exists by the time they arrive. No cookie means no
+         consent, so the Pixel simply never loads. -->
     <script>
       (function () {
         var PRODUCTION_HOSTS = ["wizard.neome.ai"];
@@ -58,6 +65,32 @@
         gtm.async = true;
         gtm.src = "https://www.googletagmanager.com/gtm.js?id=" + GTM_ID;
         document.head.appendChild(gtm);
+
+        // Everything below is advertising and needs explicit consent.
+        var consent = document.cookie.match(/(?:^|;\s*)neome_consent=(granted|denied)/);
+        if (!consent || consent[1] !== "granted") {
+          return;
+        }
+
+        var META_PIXEL_ID = "1624872309215809";
+        !(function (f, b, e, v, n, t, s) {
+          if (f.fbq) return;
+          n = f.fbq = function () {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = "2.0";
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+        window.fbq("init", META_PIXEL_ID);
+        window.fbq("track", "PageView");
       })();
     </script>
   </head>

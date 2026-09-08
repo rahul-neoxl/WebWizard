@@ -8,7 +8,7 @@ import type {
 import {storeItemEntMergeDeploy} from "../api/store";
 import {studioEntDeployStatusGet} from "../api/studio";
 import {newGuid, nextAdminId, nextEntId} from "../net/ids";
-import {trackWizardEvent} from "../utils/analytics";
+import {trackMetaEvent, trackWizardEvent} from "../utils/analytics";
 import {isoDateTimeNow, getCurrentTimeZone, getLocalDateFormat} from "../utils/date";
 
 const POLL_INTERVAL_MS = 2000;
@@ -88,6 +88,13 @@ async function pollDeployStatus(entId: string): Promise<void> {
 
     if (status?.executionState === "completed") {
       trackWizardEvent("wizard_enterprise_deployed");
+      // Meta's registration conversion. This is the point the signup is
+      // genuinely finished: the trial enterprise exists and the user can use
+      // it. Fired from the same branch as the GA4 event so the two agree.
+      trackMetaEvent("CompleteRegistration", {
+        content_name: "Wizard trial",
+        status: "completed",
+      });
       return;
     }
     if (status?.executionState === "failed") {

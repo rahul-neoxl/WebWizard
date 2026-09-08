@@ -15,6 +15,7 @@ declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
     dataLayer?: unknown[];
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -36,4 +37,19 @@ export function trackWizardEvent(event: WizardEvent, params?: GtagParams): void 
     environment: config.environment,
     ...params,
   });
+}
+
+/**
+ * Fire a Meta Pixel standard event.
+ *
+ * Safe no-op whenever the Pixel is absent, which covers every non-production
+ * host and any visitor who did not accept cookies on neome.ai — the Pixel is
+ * gated on that consent cookie in index.html, so callers never check it.
+ */
+export function trackMetaEvent(event: string, params?: Record<string, unknown>): void {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("track", event, params);
 }
