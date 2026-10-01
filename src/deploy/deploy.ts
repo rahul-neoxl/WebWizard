@@ -151,6 +151,7 @@ export async function runDeploy(
     };
 
     await storeItemEntMergeDeploy({
+      includeData: true,
       studioEnt: buildStudioEnt(adminId, entId, details),
       templateCodes: input.preSelectedApps,
     });

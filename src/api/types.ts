@@ -76,6 +76,13 @@ export interface StudioEntMap {
   map: Record<string, unknown>;
 }
 
+export interface DtoCloneConfig
+{
+  cloneAdmin?: boolean;
+  cloneEntUser?: boolean;
+  cloneSpreadsheetIdSet?: string[];
+}
+
 export interface StudioEnt {
   entId: string;
   version: string;
@@ -107,6 +114,8 @@ export interface StudioEnt {
  * separate merge + create + deploy calls.
  */
 export interface MsgStoreItemEntMergeDeploy {
+  cloneConfig?: DtoCloneConfig;
+  includeData?: boolean;
   studioEnt: StudioEnt;
   templateCodes: string[];
 }
